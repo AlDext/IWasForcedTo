@@ -2,7 +2,7 @@
 #include <vector>
 
 int main() {
-    std::vector<std::string> orderlist;
+    std::vector<std::string> orderlist; //list of string variables into a single "variable"
     bool nomoreorders = false;
 
     double bill = 0;
