@@ -55,7 +55,7 @@ int main() {
             }
 
         }
-        //check the bill to add discounts and let the client know about the discount
+        //check the bill to apply and display discounts
         if (bill > 999) {
             fbill=bill-(bill*.10);
             discount = " (20% discount)";
