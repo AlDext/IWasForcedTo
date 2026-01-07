@@ -9,6 +9,7 @@ int main() {
     double fbill = 0;
     double money;
 
+    //prices
     double fastfoodcost = 1050;
     double healthyfoodcost = 550;
     double dessert = 350;
@@ -16,14 +17,14 @@ int main() {
     std::string discount = "";
     std::cout << "WELCOME TO MISHA FAMILY DINER";
 
-    do{ //do while condition is true
+    do{ //do everything inside while condition is true
         while (!nomoreorders) {
             char ordering;
-            int corder = 0;
+            int corder = 0; //to store the current item
             std::cout << "\nWhat would you like to order? Please select corresponding number of your desired order\n1. Fast food\n2. Healthy food\n3. Dessert\n";
             std::cin >> corder;
 
-            switch (corder) {
+            switch (corder) { //to add the cost of each item to the bill and the orderlist
                 case 1:
                     bill+=fastfoodcost;
                     orderlist.push_back("Fast food");
@@ -41,12 +42,12 @@ int main() {
                     break;
             }
             corder = 0;
-            std::cout << "Your bill is currently: " << bill;
+            std::cout << "Your bill is currently: " << bill; //display the current bill
             std::cout << "\nYour current order list:";
-            for (int i=0; i<orderlist.size(); i++) {
+            for (int i=0; i<orderlist.size(); i++) { //use a for loop to iterate throughout the vector and siplay each element
                 std::cout << "\n - " << orderlist[i];
             }
-            std::cout << "\n\nWould you like to order more(y/n): ";
+            std::cout << "\n\nWould you like to order more(y/n): "; 
             std::cin >> ordering;
 
             if (ordering == 'n') {
@@ -54,6 +55,7 @@ int main() {
             }
 
         }
+        //check the bill to add discounts
         if (bill > 999) {
             fbill=bill-(bill*.10);
             discount = " (20% discount)";
