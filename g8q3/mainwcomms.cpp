@@ -41,7 +41,7 @@ int main() {
                     std::cout << "Sorry! The number is not on the menu\n";
                     break;
             }
-            corder = 0;
+            //corder = 0;
             std::cout << "Your bill is currently: " << bill; //display the current bill
             std::cout << "\nYour current order list:";
             for (int i=0; i<orderlist.size(); i++) { //use a for loop to iterate throughout the vector and siplay each element
