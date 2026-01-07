@@ -57,11 +57,11 @@ int main() {
         }
         //check the bill to apply and display discounts
         if (bill > 999) {
-            fbill=bill-(bill*.10);
+            fbill=bill-(bill*.20);
             discount = " (20% discount)";
         }
         else if (bill > 499) {
-            fbill=bill-(bill*.20);
+            fbill=bill-(bill*.10);
             discount = " (10% discount)";
         }
         else {
