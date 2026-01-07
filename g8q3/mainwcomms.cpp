@@ -16,7 +16,7 @@ int main() {
     std::string discount = "";
     std::cout << "WELCOME TO MISHA FAMILY DINER";
 
-    do{
+    do{ //do while condition is true
         while (!nomoreorders) {
             char ordering;
             int corder = 0;
