@@ -73,7 +73,7 @@ int main() {
             std::cout << "Oops! it looks like you need more money than that!";
         }
         else {
-            std::cout << "Thank you for ordering!\n your change is " << money-fbill;
+            std::cout << "Thank you for ordering!\n your change is " << fbill-money;
         }
     }while (money<fbill);
 
