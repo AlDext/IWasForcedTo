@@ -68,7 +68,7 @@ int main() {
             fbill = bill;
         }
         std::cout << "Your bill is: " << fbill << discount; //display final bill
-        std::cout << "\nHow much will you pay? ";
+        std::cout << "\nHow much would you like to pay? ";
         std::cin >> money;
 
         if (fbill>money) { //check if the client's payment is less than the bill
