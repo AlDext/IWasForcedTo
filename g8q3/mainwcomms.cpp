@@ -3,7 +3,7 @@
 
 int main() {
     std::vector<std::string> orderlist; //list of string variables into a single "variable"
-    bool nomoreorders = false;
+    
 
     double bill = 0;
     double fbill = 0;
@@ -17,7 +17,7 @@ int main() {
     std::string discount = "";
     std::cout << "-----WELCOME TO MISHA FAMILY DINER-----";
 
-    while (!nomoreorders) { //do everything inside while condition is true
+    while (true) { //do everything inside while condition is true
             char ordering;
             int corder = 0; //to store the current item
             std::cout << "\nWhat would you like to order? Please select corresponding number of your desired order\n1. Fast food\n2. Healthy food\n3. Dessert\n";
@@ -50,7 +50,7 @@ int main() {
             std::cin >> ordering;
 
             if (ordering == 'n') {
-                nomoreorders = true;
+                break;
             }
 
         }
