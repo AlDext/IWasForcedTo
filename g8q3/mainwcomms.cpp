@@ -17,7 +17,7 @@ int main() {
     std::string discount = "";
     std::cout << "WELCOME TO MISHA FAMILY DINER";
 
-    while (money<fbill){ //do everything inside while condition is true
+    do{ //do everything inside while condition is true
         while (!nomoreorders) {
             char ordering;
             int corder = 0; //to store the current item
@@ -77,6 +77,6 @@ int main() {
         else {
             std::cout << "Thank you for ordering!\n your change is " << money-fbill;
         }
-    }
+    }while(money<fbill);
 
 }
