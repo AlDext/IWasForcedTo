@@ -1,30 +1,30 @@
 { pkgs, ... }: 
 let
-  # This "pre-fetches" the ArchEclipse code into the Nix Store
-  archeclipse-src = pkgs.fetchFromGitHub {
-    owner = "AymanLyesri";
-    repo = "ArchEclipse";
-    rev = "master"; # Or a specific commit hash
-    sha256 = "0000000000000000000000000000000000000000000000000000"; 
-    # Tip: Run the rebuild, it will fail and tell you the REAL hash. 
-    # Copy the "got:" hash and paste it here.
+  # This downloads the repo as a static folder in the Nix Store
+  archeclipse-src = fetchTarball {
+    url = "https://github.com/AymanLyesri/ArchEclipse/archive/master.tar.gz";
   };
 in
 {
-  # Now we just symlink the files
   system.userActivationScripts.archeclipseSync = {
     text = ''
+      # 1. Set your username correctly here
       TARGET_USER="your_actual_username"
       HOME_DIR="/home/$TARGET_USER"
-      
+
+      echo "Syncing ArchEclipse files from the Nix Store..."
+
+      # 2. Ensure the .config directory exists
       mkdir -p "$HOME_DIR/.config"
+
+      # 3. Copy the files from the Nix Store to your home folder
+      # Using 'cp' instead of 'ln' to avoid "Read-only file system" errors in scripts
+      cp -ra "${archeclipse-src}/.config/." "$HOME_DIR/.config/"
+
+      # 4. Fix permissions so YOU own the files, not root
+      chown -R $TARGET_USER:users "$HOME_DIR/.config"
       
-      # Link the folders from the Nix Store to your home
-      ln -sfn "${archeclipse-src}/.config/hypr" "$HOME_DIR/.config/hypr"
-      ln -sfn "${archeclipse-src}/.config/ags" "$HOME_DIR/.config/ags"
-      
-      chown -h $TARGET_USER:users "$HOME_DIR/.config/hypr"
-      chown -h $TARGET_USER:users "$HOME_DIR/.config/ags"
+      echo "ArchEclipse sync complete!"
     '';
   };
 }
