@@ -1,24 +1,27 @@
 system.userActivationScripts.archeclipseSync = {
   text = ''
-    # Use your actual username here
-    TARGET_USER="yourusername" 
-    TARGET_HOME="/home/$TARGET_USER"
+    # Current Date: ${builtins.currentTime} 
+    # ^ This line forces Nix to see the script as "new" every time you rebuild
     
-    # Ensure git is available and the network can be reached
-    echo "Starting ArchEclipse Sync for $TARGET_USER..."
+    TARGET_USER="your_actual_username"
+    HOME_DIR="/home/$TARGET_USER"
 
-    if [ ! -d "$TARGET_HOME/ArchEclipse" ]; then
-      # Run as the actual user to avoid permission headaches
-      sudo -u $TARGET_USER ${pkgs.git}/bin/git clone --depth 1 https://github.com/AymanLyesri/ArchEclipse.git "$TARGET_HOME/ArchEclipse"
+    echo "Running ArchEclipse Sync for $TARGET_USER..."
+
+    # Create .config if it doesn't exist
+    mkdir -p "$HOME_DIR/.config"
+
+    # Clone directly into a temporary location if the main folder is missing
+    if [ ! -d "$HOME_DIR/ArchEclipse" ]; then
+      ${pkgs.git}/bin/git clone --depth 1 https://github.com/AymanLyesri/ArchEclipse.git "$HOME_DIR/ArchEclipse"
     fi
 
-    if [ -d "$TARGET_HOME/ArchEclipse/.config" ]; then
-      echo "Copying configs..."
-      # Use -n to avoid overwriting files you've already customized
-      cp -ra "$TARGET_HOME/ArchEclipse/.config/." "$TARGET_HOME/.config/"
-      chown -R $TARGET_USER:users "$TARGET_HOME/.config"
-    else
-      echo "Error: Source .config not found in cloned repo!"
+    # Sync the files
+    if [ -d "$HOME_DIR/ArchEclipse/.config" ]; then
+      cp -ra "$HOME_DIR/ArchEclipse/.config/." "$HOME_DIR/.config/"
+      chown -R $TARGET_USER:users "$HOME_DIR/.config"
+      chown -R $TARGET_USER:users "$HOME_DIR/ArchEclipse"
+      echo "Sync completed successfully."
     fi
   '';
 };
