@@ -1,22 +1,24 @@
 system.userActivationScripts.archeclipseSync = {
   text = ''
-    USER_HOME="/home/yourusername" # Change this to your actual username
-    CONF_DIR="$USER_HOME/.config"
+    # Use your actual username here
+    TARGET_USER="yourusername" 
+    TARGET_HOME="/home/$TARGET_USER"
     
-    # Create config dir if missing
-    mkdir -p "$CONF_DIR"
+    # Ensure git is available and the network can be reached
+    echo "Starting ArchEclipse Sync for $TARGET_USER..."
 
-    # Only clone if we haven't already
-    if [ ! -d "$USER_HOME/ArchEclipse" ]; then
-      ${pkgs.git}/bin/git clone --depth 1 https://github.com/AymanLyesri/ArchEclipse.git "$USER_HOME/ArchEclipse"
-      
-      # Copying the .config folder content
-      # We use 'cp -rs' to symlink if possible, or 'cp -a' for simple copy
-      cp -a "$USER_HOME/ArchEclipse/.config/." "$CONF_DIR/"
-      
-      # Fix permissions so your user owns the files
-      chown -R yourusername:users "$USER_HOME/ArchEclipse"
-      chown -R yourusername:users "$CONF_DIR"
+    if [ ! -d "$TARGET_HOME/ArchEclipse" ]; then
+      # Run as the actual user to avoid permission headaches
+      sudo -u $TARGET_USER ${pkgs.git}/bin/git clone --depth 1 https://github.com/AymanLyesri/ArchEclipse.git "$TARGET_HOME/ArchEclipse"
+    fi
+
+    if [ -d "$TARGET_HOME/ArchEclipse/.config" ]; then
+      echo "Copying configs..."
+      # Use -n to avoid overwriting files you've already customized
+      cp -ra "$TARGET_HOME/ArchEclipse/.config/." "$TARGET_HOME/.config/"
+      chown -R $TARGET_USER:users "$TARGET_HOME/.config"
+    else
+      echo "Error: Source .config not found in cloned repo!"
     fi
   '';
 };
