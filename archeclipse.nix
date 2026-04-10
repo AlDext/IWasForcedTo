@@ -1,27 +1,30 @@
-system.userActivationScripts.archeclipseSync = {
-  text = ''
-    # Current Date: ${builtins.currentTime} 
-    # ^ This line forces Nix to see the script as "new" every time you rebuild
-    
-    TARGET_USER="your_actual_username"
-    HOME_DIR="/home/$TARGET_USER"
-
-    echo "Running ArchEclipse Sync for $TARGET_USER..."
-
-    # Create .config if it doesn't exist
-    mkdir -p "$HOME_DIR/.config"
-
-    # Clone directly into a temporary location if the main folder is missing
-    if [ ! -d "$HOME_DIR/ArchEclipse" ]; then
-      ${pkgs.git}/bin/git clone --depth 1 https://github.com/AymanLyesri/ArchEclipse.git "$HOME_DIR/ArchEclipse"
-    fi
-
-    # Sync the files
-    if [ -d "$HOME_DIR/ArchEclipse/.config" ]; then
-      cp -ra "$HOME_DIR/ArchEclipse/.config/." "$HOME_DIR/.config/"
-      chown -R $TARGET_USER:users "$HOME_DIR/.config"
-      chown -R $TARGET_USER:users "$HOME_DIR/ArchEclipse"
-      echo "Sync completed successfully."
-    fi
-  '';
-};
+{ pkgs, ... }: 
+let
+  # This "pre-fetches" the ArchEclipse code into the Nix Store
+  archeclipse-src = pkgs.fetchFromGitHub {
+    owner = "AymanLyesri";
+    repo = "ArchEclipse";
+    rev = "master"; # Or a specific commit hash
+    sha256 = "0000000000000000000000000000000000000000000000000000"; 
+    # Tip: Run the rebuild, it will fail and tell you the REAL hash. 
+    # Copy the "got:" hash and paste it here.
+  };
+in
+{
+  # Now we just symlink the files
+  system.userActivationScripts.archeclipseSync = {
+    text = ''
+      TARGET_USER="your_actual_username"
+      HOME_DIR="/home/$TARGET_USER"
+      
+      mkdir -p "$HOME_DIR/.config"
+      
+      # Link the folders from the Nix Store to your home
+      ln -sfn "${archeclipse-src}/.config/hypr" "$HOME_DIR/.config/hypr"
+      ln -sfn "${archeclipse-src}/.config/ags" "$HOME_DIR/.config/ags"
+      
+      chown -h $TARGET_USER:users "$HOME_DIR/.config/hypr"
+      chown -h $TARGET_USER:users "$HOME_DIR/.config/ags"
+    '';
+  };
+}
