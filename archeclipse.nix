@@ -1,30 +1,59 @@
-{ pkgs, ... }: 
-let
-  # This downloads the repo as a static folder in the Nix Store
-  archeclipse-src = fetchTarball {
-    url = "https://github.com/AymanLyesri/ArchEclipse/archive/master.tar.gz";
-  };
-in
 {
-  system.userActivationScripts.archeclipseSync = {
-    text = ''
-      # 1. Set your username correctly here
-      TARGET_USER="your_actual_username"
-      HOME_DIR="/home/$TARGET_USER"
+  description = "My NixOS configuration with Home Manager and ArchEclipse";
 
-      echo "Syncing ArchEclipse files from the Nix Store..."
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";   # or nixos-25.11 if you prefer stable
 
-      # 2. Ensure the .config directory exists
-      mkdir -p "$HOME_DIR/.config"
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-      # 3. Copy the files from the Nix Store to your home folder
-      # Using 'cp' instead of 'ln' to avoid "Read-only file system" errors in scripts
-      cp -ra "${archeclipse-src}/.config/." "$HOME_DIR/.config/"
+    archeclipse = {
+      url = "github:AymanLyesri/ArchEclipse";
+      flake = false;   # This is important — it's just files, not a Nix flake
+    };
+  };
 
-      # 4. Fix permissions so YOU own the files, not root
-      chown -R $TARGET_USER:users "$HOME_DIR/.config"
-      
-      echo "ArchEclipse sync complete!"
-    '';
+  outputs = { self, nixpkgs, home-manager, archeclipse, ... }: {
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {   # ← change "nixos" to your actual hostname if different
+      system = "x86_64-linux";   # change to aarch64-linux only if you're on ARM (like Raspberry Pi)
+
+      modules = [
+        ./configuration.nix   # your main system config (hardware, packages, etc.)
+
+        # Integrate Home Manager into NixOS (so one rebuild does everything)
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+
+          # Replace "yourusername" with your actual login username
+          home-manager.users.yourusername = { config, pkgs, ... }: {
+            imports = [ ];   # you can add ./home.nix later if you want to split it
+
+            # === ArchEclipse dotfiles go here ===
+            home.file = {
+              ".config" = {
+                source = "${archeclipse}/.config";
+                recursive = true;
+              };
+
+              ".zshrc" = {
+                source = "${archeclipse}/.zshrc";
+              };
+
+              ".icons" = {
+                source = "${archeclipse}/.icons";
+                recursive = true;
+              };
+            };
+
+            # Optional: make Hyprland reload after changes
+            wayland.windowManager.hyprland.enable = true;   # if not already enabled in configuration.nix
+          };
+        }
+      ];
+    };
   };
 }
