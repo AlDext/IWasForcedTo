@@ -1,0 +1,184 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <EEPROM.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+const int sensor1  = 2;
+const int sensor5  = 3;
+const int sensor10 = 4;
+
+const int button1  = 5;
+const int button5  = 6;
+const int button10 = 7;
+
+int count1;
+int count5;
+int count10;
+
+int previousSensor1  = HIGH;
+int previousSensor5  = HIGH;
+int previousSensor10 = HIGH;
+
+void setup() {
+    pinMode(sensor1, INPUT);
+    pinMode(sensor5, INPUT);
+    pinMode(sensor10, INPUT);
+
+    pinMode(button1, INPUT_PULLUP);
+    pinMode(button5, INPUT_PULLUP);
+    pinMode(button10, INPUT_PULLUP);
+
+    Serial.begin(9600);
+
+    lcd.init();
+    lcd.backlight();
+
+    EEPROM.get(0, count1);
+    EEPROM.get(4, count5);
+    EEPROM.get(8, count10);
+
+
+    updateDisplay();
+}
+
+
+void loop() {
+
+    checkCoins();
+
+    checkWithdrawals();
+}
+
+void checkCoins() {
+
+    int current1  = digitalRead(sensor1);
+    int current5  = digitalRead(sensor5);
+    int current10 = digitalRead(sensor10);
+
+    if (previousSensor1 == HIGH &&
+        current1 == LOW) {
+
+        count1++;
+
+        saveData();
+
+        updateDisplay();
+
+        Serial.println("₱1 coin detected");
+    }
+
+    if (previousSensor5 == HIGH &&
+        current5 == LOW) {
+
+        count5++;
+
+        saveData();
+
+        updateDisplay();
+
+        Serial.println("₱5 coin detected");
+    }
+
+    if (previousSensor10 == HIGH &&
+        current10 == LOW) {
+
+        count10++;
+
+        saveData();
+
+        updateDisplay();
+
+        Serial.println("₱10 coin detected");
+    }
+
+    previousSensor1  = current1;
+    previousSensor5  = current5;
+    previousSensor10 = current10;
+}
+
+void checkWithdrawals() {
+    if (digitalRead(button1) == LOW) {
+
+        if (count1 > 0) {
+
+            count1--;
+
+            saveData();
+
+            updateDisplay();
+        }
+
+        delay(250);
+    }
+
+
+    if (digitalRead(button5) == LOW) {
+
+        if (count5 > 0) {
+
+            count5--;
+
+            saveData();
+
+            updateDisplay();
+        }
+
+        delay(250);
+    }
+
+
+    if (digitalRead(button10) == LOW) {
+
+        if (count10 > 0) {
+
+            count10--;
+
+            saveData();
+
+            updateDisplay();
+        }
+
+        delay(250);
+    }
+}
+
+
+void saveData() {
+
+    EEPROM.put(0, count1);
+    EEPROM.put(4, count5);
+    EEPROM.put(8, count10);
+}
+
+
+int getTotal() {
+
+    return
+        count1 +
+        (count5 * 5) +
+        (count10 * 10);
+}
+
+
+void updateDisplay() {
+
+    int total = getTotal();
+
+    lcd.setCursor(0, 0);
+
+    lcd.print("P1:");
+    lcd.print(count1);
+
+    lcd.print(" P5:");
+    lcd.print(count5);
+
+    lcd.setCursor(0, 1);
+
+    lcd.print("P10:");
+    lcd.print(count10);
+
+    lcd.print(" T:P");
+    lcd.print(total);
+
+    lcd.print("   ");
+}
